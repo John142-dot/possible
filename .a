@@ -1,0 +1,61 @@
+local Admin = {}
+
+local Services = {
+    Players = game:GetService("Players"),
+    ScriptService = game:GetService("ServerScriptService"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage"),
+    DataStore = game:GetService("DataStoreService")
+}
+
+function Admin.Run(Settings)
+    local AutoConfig = Services["DataStore"]:GetDataStore(Settings["DataKey"])
+    
+    local Owners = {}
+    local Admins = {}
+    local Moderators = {}
+
+    if Settings["AutoConfigure"] == true then
+        if not AutoConfig:GetAsync("Exists") then
+            AutoConfig:SetAsync("Exists", true)
+            AutoConfig:SetAsync("Owners", Settings["Owners"])
+            AutoConfig:SetAsync("Admins", Settings["Admins"])
+            AutoConfig:SetAsync("Moderators", Settings["Moderators"])
+        end
+
+        Owners = AutoConfig:GetAsync("Owners") or {}
+        Admins = AutoConfig:GetAsync("Admins") or {}
+        Moderators = AutoConfig:GetAsync("Moderators") or {}
+    else
+        Owners = Settings["Owners"] or {}
+        Admins = Settings["Admins"] or {}
+        Moderators = Settings["Moderators"] or {}
+    end
+
+    local LoaderScript = script.ArceusAdmin:Clone()
+    LoaderScript.Parent = Services["ScriptService"]
+
+    LoaderScript.DataKey.Value = Settings["DataKey"]
+    LoaderScript.UseHttp.Value = Settings["UseHttp"]
+
+    for _, v in ipairs(Owners) do
+        local Value = Instance.new("StringValue", LoaderScript.Owners)
+        Value.Name = v
+        Value.Value = v
+    end
+
+    for _, v in ipairs(Admins) do
+        local Value = Instance.new("StringValue", LoaderScript.Admins)
+        Value.Name = v
+        Value.Value = v
+    end
+
+    for _, v in ipairs(Moderators) do
+        local Value = Instance.new("StringValue", LoaderScript.Moderators)
+        Value.Name = v
+        Value.Value = v
+    end
+
+    LoaderScript.Disabled = false
+end
+
+return Admin
